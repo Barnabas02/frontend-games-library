@@ -31,15 +31,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Do</td>
-                <td>Re</td>
-                <td>Mi</td>
-                <td>Fa</td>
+              <tr v-for="(game, index) in games" :key="index">
+                <td>{{ game.title }}</td>
+                <td>{{ game.genre }}</td>
+                <td>
+                  <span v-if="game.played">Yes</span>
+                  <span v-else>No</span>
+                </td>
                 <td>
                   <div class="btn-group" role="group">
-                      <button type="button" class="btn btn-info btn-sm">Update</button>
-                      <button type="button" class="btn btn-danger btn-sm">Delete</button>
+                    <button type="button" class="btn btn-info btn-sm">
+                      Update
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm">
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -52,7 +58,31 @@
 </template>
 
 <script>
-export default {};
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      games: [],
+    };
+  },
+  methods: {
+    getGames() {
+      const path = "http://localhost:5000/games";
+      axios
+        .get(path)
+        .then((res) => {
+          this.games = res.data.games;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    },
+  },
+  created() {
+    this.getGames();
+  },
+};
 </script>
 
 <style></style>
