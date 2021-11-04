@@ -22,7 +22,7 @@
 
           <!-- Alert Message -->
 
-          <button type="button" class="btn btn-success btn-sm">Add Game</button>
+          <button type="button" class="btn btn-success btn-sm" v-b-modal.game-modal>Add Game</button>
           <br /><br />
           <table class="table table-hover">
             <!-- table head -->
@@ -56,9 +56,68 @@
               </tr>
             </tbody>
           </table>
-          <footer class="bg-primary text-white text-center" style="border-radius:10px">Copyright &copy;. All rights reserve 2021</footer>
+          <footer
+            class="bg-primary text-white text-center"
+            style="border-radius: 10px"
+          >
+            Copyright &copy;. All rights reserve 2021
+          </footer>
         </div>
       </div>
+      <!-- first modal -->
+      <b-modal
+        ref="addGameModal"
+        id="game-modal"
+        title="Add a new game"
+        hide-backdrop
+        hide-footer
+      >
+        <b-form @submit="onSubmit" @reset="onReset" class="w-100">
+          <b-form-group
+            id="form-title-group"
+            label="Title:"
+            label-for="form-title-input"
+          >
+            <b-form-input
+              id="form-title-input"
+              type="text"
+              v-model="addGameForm.title"
+              required
+              placeholder="Enter Game"
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-title-group"
+            label="Title:"
+            label-for="form-title-input"
+          >
+            <b-form-input
+              id="form-genre-input"
+              type="text"
+              v-model="addGameForm.genre"
+              required
+              placeholder="Enter Genre"
+            >
+            </b-form-input>
+          </b-form-group>
+          <!-- checkbox -->
+          <b-form-group id="form-played-group">
+            <b-form-checkbox-group
+              v-model="addGameForm.played"
+              id="form-checks"
+            >
+              <b-form-checkbox value="true">Played?</b-form-checkbox>
+            </b-form-checkbox-group>
+          </b-form-group>
+
+          <!-- buttons: submit and reset -->
+
+          <b-button type="submit" variant="outline-info">Submit</b-button>
+          <b-button type="reset" variant="outline-danger">Reset</b-button>
+        </b-form>
+      </b-modal>
     </div>
   </div>
 </template>
@@ -70,9 +129,15 @@ export default {
   data() {
     return {
       games: [],
+      addGameForm: {
+        title: "",
+        genre: "",
+        played: [],
+      },
     };
   },
   methods: {
+    //   GET function
     getGames() {
       const path = "http://localhost:5000/games";
       axios
@@ -84,6 +149,41 @@ export default {
           console.error(err);
         });
     },
+    // POST function
+    addGame(payload) {
+      const path = "http://localhost:5000/games";
+      axios
+        .post(path, payload)
+        .then(() => {
+          this.getGames();
+        })
+        .catch((err) => {
+          console.error(err);
+          this.getGames();
+        });
+    },
+    initForm() {
+      this.addGameForm.title = "";
+      this.addGameForm.genre = "";
+      this.addGameForm.played = [];
+    },
+    onSubmit(e) {
+      e.preventDefault();
+      this.$refs.addGameModal.hide();
+      let played = false;
+      const payload = {
+        title: this.addGameForm.title,
+        genre: this.addGameForm.genre,
+        played,
+      };
+      this.addGame(payload);
+      this.initForm();
+    },
+    onReset(e){
+        e.preventDefault();
+        this.$refs.addGameModal.hide();
+        this.initForm();
+    }
   },
   created() {
     this.getGames();
