@@ -54,7 +54,12 @@
                 </td>
                 <td>
                   <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-info btn-sm">
+                    <button
+                      type="button"
+                      class="btn btn-info btn-sm"
+                      v-b-modal.game-update-modal
+                      @click="editGame(game)"
+                    >
                       Update
                     </button>
                     <button type="button" class="btn btn-danger btn-sm">
@@ -73,6 +78,7 @@
           </footer>
         </div>
       </div>
+
       <!-- first modal -->
       <b-modal
         ref="addGameModal"
@@ -127,6 +133,60 @@
           <b-button type="reset" variant="outline-danger">Reset</b-button>
         </b-form>
       </b-modal>
+      <!-- End of modal 1 -->
+
+      <!-- Start of Modal 2 -->
+      <b-modal
+        ref="editGameModal"
+        id="game-update-modal"
+        title="Update"
+        hide-backdrop
+        hide-footer
+      >
+        <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
+          <b-form-group
+            id="form-title-edit-group"
+            label="Title:"
+            label-for="form-title-edit-input"
+          >
+            <b-form-input
+              id="form-title-edit-input"
+              type="text"
+              v-model="editForm.title"
+              required
+              placeholder="Enter title"
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-genre-edit-group"
+            label="Genre:"
+            label-for="form-genre-edit-input"
+          >
+            <b-form-input
+              id="form-genre-edit-input"
+              type="text"
+              v-model="editForm.genre"
+              required
+              placeholder="Enter genre"
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group id="form-played-edit-group">
+            <b-form-checkbox-group v-model="editForm.played" id="form-checks">
+              <b-form-checkbox value="true">Played?</b-form-checkbox>
+            </b-form-checkbox-group>
+          </b-form-group>
+
+          <b-button-group>
+            <b-button type="submit" variant="outline-info">Update</b-button>
+            <b-button type="reset" variant="outline-danger">Cancel</b-button>
+          </b-button-group>
+        </b-form>
+      </b-modal>
+      <!-- end of modal 2 -->
     </div>
   </div>
 </template>
@@ -139,6 +199,12 @@ export default {
     return {
       games: [],
       addGameForm: {
+        title: "",
+        genre: "",
+        played: [],
+      },
+      editForm: {
+        id: "",
         title: "",
         genre: "",
         played: [],
@@ -180,7 +246,12 @@ export default {
       this.addGameForm.title = "";
       this.addGameForm.genre = "";
       this.addGameForm.played = [];
+      this.editForm.id = "";
+      this.editForm.title = "";
+      this.editForm.genre = "";
+      this.editForm.played = [];
     },
+    // submit newgame
     onSubmit(e) {
       e.preventDefault();
       this.$refs.addGameModal.hide();
@@ -198,6 +269,46 @@ export default {
       e.preventDefault();
       this.$refs.addGameModal.hide();
       this.initForm();
+    },
+
+    // update individual Record
+    updateGame(payload, gameID) {
+      const path = `http://localhost:5000/games/${gameID}`;
+      axios
+        .put(path, payload)
+        .then(() => {
+          this.getGames();
+          this.message = "Game Updated!!";
+          this.showMessage = true;
+        })
+        .catch((err) => {
+          console.error(err);
+          this.getGames();
+        });
+    },
+
+    // handle update button
+    editGame(game) {
+      this.editForm = game;
+    },
+    // submit udpated gamegame
+    onSubmitUpdate(e) {
+      e.preventDefault();
+      this.$refs.editGameModal.hide();
+      let played = false;
+      if (this.editForm.played[0]) played = true;
+      const payload = {
+        title: this.editForm.title,
+        genre: this.editForm.genre,
+        played,
+      };
+      this.updateGame(payload, this.editForm.id);
+    },
+    onResetUpdate(e) {
+      e.preventDefault();
+      this.$refs.editGameModal.hide();
+      this.initForm();
+      this.getGames();
     },
   },
   created() {
