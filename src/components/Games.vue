@@ -21,8 +21,17 @@
           <br />
 
           <!-- Alert Message -->
+          <b-alert variant="success" v-if="showMessage" show>{{
+            message
+          }}</b-alert>
 
-          <button type="button" class="btn btn-success btn-sm" v-b-modal.game-modal>Add Game</button>
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            v-b-modal.game-modal
+          >
+            Add Game
+          </button>
           <br /><br />
           <table class="table table-hover">
             <!-- table head -->
@@ -136,6 +145,9 @@ export default {
       },
     };
   },
+
+  message: "",
+
   methods: {
     //   GET function
     getGames() {
@@ -156,6 +168,8 @@ export default {
         .post(path, payload)
         .then(() => {
           this.getGames();
+          this.message = "Game Added!!";
+          this.showMessage = true;
         })
         .catch((err) => {
           console.error(err);
@@ -171,6 +185,7 @@ export default {
       e.preventDefault();
       this.$refs.addGameModal.hide();
       let played = false;
+      if (this.addGameForm.played[0]) played = true;
       const payload = {
         title: this.addGameForm.title,
         genre: this.addGameForm.genre,
@@ -179,11 +194,11 @@ export default {
       this.addGame(payload);
       this.initForm();
     },
-    onReset(e){
-        e.preventDefault();
-        this.$refs.addGameModal.hide();
-        this.initForm();
-    }
+    onReset(e) {
+      e.preventDefault();
+      this.$refs.addGameModal.hide();
+      this.initForm();
+    },
   },
   created() {
     this.getGames();
