@@ -62,7 +62,11 @@
                     >
                       Update
                     </button>
-                    <button type="button" class="btn btn-danger btn-sm">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      @click="deleteGame(game)"
+                    >
                       Delete
                     </button>
                   </div>
@@ -285,6 +289,26 @@ export default {
           console.error(err);
           this.getGames();
         });
+    },
+
+    removeGame(gameID) {
+      const path = `http://localhost:5000/games/${gameID}`;
+      axios
+        .delete(path)
+        .then(() => {
+          this.getGames();
+          this.message = "Game Removed!!";
+          this.showMessage = true;
+        })
+        .catch((err) => {
+          console.error(err);
+          this.getGames();
+        });
+    },
+
+    // handle delete button
+    deleteGame(game) {
+      this.removeGame(game.id);
     },
 
     // handle update button
